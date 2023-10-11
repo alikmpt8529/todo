@@ -37,7 +37,9 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const isDeadlineExpired = new Date(todo.deadline) < new Date();
-  const isDeadlineNear = !isDeadlineExpired; // 期日が過ぎた場合は"過ぎています"メッセージを表示しない
+  const isDeadlineNear = !isDeadlineExpired;
+  const isDeadlineToday =
+    new Date(todo.deadline).toDateString() === new Date().toDateString();
 
   const handleDeleteClick = () => {
     handleDeleteTodo(index);
@@ -54,8 +56,8 @@ const TodoItem: React.FC<TodoItemProps> = ({
         style={{
           textDecoration: todo.isCompleted ? 'line-through' : 'none',
           marginRight: '8px',
-          color: isDeadlineExpired ? 'red' : isDeadlineNear ? 'blue' : 'black',
-          fontWeight: isDeadlineNear ? 'bold' : 'normal',
+          color: isDeadlineExpired ? 'red' : isDeadlineNear ? 'blue' : isDeadlineToday ? 'blue' : 'black',
+          fontWeight: isDeadlineNear || isDeadlineToday ? 'bold' : 'normal',
         }}
       >
         {todo.text}
@@ -67,10 +69,15 @@ const TodoItem: React.FC<TodoItemProps> = ({
               type="datetime-local"
               value={deadlineInput}
               onChange={handleDeadlineChange}
+              style={{ color: isDeadlineExpired ? 'red' : 'inherit' }}
             />
           ) : (
             <span
-              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+              style={{
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                color: isDeadlineExpired ? 'red' : 'inherit',
+              }}
               onClick={() => setEditDeadlineMode(true)}
             >
               {new Date(todo.deadline).toLocaleString()}
@@ -83,7 +90,10 @@ const TodoItem: React.FC<TodoItemProps> = ({
       )}
       <button onClick={handleDeleteClick}>Clear!</button>
       {isDeadlineExpired && !todo.isCompleted && (
-        <span>期日が過ぎています！</span>
+        <span style={{ color: 'red' }}>警告！</span>
+      )}
+      {isDeadlineToday && !isDeadlineExpired && (
+        <span style={{ color: 'blue', fontWeight: 'bold' }}>急げ！</span>
       )}
     </li>
   );
@@ -102,6 +112,7 @@ function App() {
   const [taskCount, setTaskCount] = useState(0);
   const [overdueCount, setOverdueCount] = useState(0);
   const [duplicateCount, setDuplicateCount] = useState(1);
+  const [todayTaskCount, setTodayTaskCount] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
@@ -111,6 +122,11 @@ function App() {
       (todo) => new Date(todo.deadline) < new Date() && !todo.isCompleted
     );
     setOverdueCount(overdueTasks.length);
+
+    const todayTasks = todos.filter(
+      (todo) => new Date(todo.deadline).toDateString() === new Date().toDateString()
+    );
+    setTodayTaskCount(todayTasks.length);
   }, [todos]);
 
   useEffect(() => {
@@ -171,6 +187,7 @@ function App() {
         <p>Now: {currentDateTime.toLocaleString()}</p>
         <p>Total Tasks: {taskCount}</p>
         <p>Overdue Tasks: {overdueCount}</p>
+        <p>Today's Tasks: {todayTaskCount}</p>
         {taskCount === 0 && <p>やることないよ！</p>}
         {taskCount >= 10 && <p>早く処理してください！</p>}
       </div>
@@ -196,11 +213,11 @@ function App() {
             handleDeleteTodo={handleDeleteTodo}
             handleToggleTodo={handleToggleTodo}
             handleSetDeadline={handleSetDeadline}
-            />
-            ))}
-            </ul>
-            </>
-            );
-            }
-            
-            export default App;
+          />
+        ))}
+      </ul>
+    </>
+  );
+}
+
+export default App;
