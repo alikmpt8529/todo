@@ -56,8 +56,12 @@ const TodoItem: React.FC<TodoItemProps> = ({
         style={{
           textDecoration: todo.isCompleted ? 'line-through' : 'none',
           marginRight: '8px',
-          color: isDeadlineExpired ? 'red' : isDeadlineNear ? 'blue' : isDeadlineToday ? 'blue' : 'black',
-          fontWeight: isDeadlineNear || isDeadlineToday ? 'bold' : 'normal',
+          color: isDeadlineExpired
+            ? 'red'
+            :  isDeadlineToday
+            ? 'blue'
+            : 'black',
+          fontWeight:  isDeadlineToday ? 'bold' : 'normal',
         }}
       >
         {todo.text}
