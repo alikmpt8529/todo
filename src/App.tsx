@@ -36,8 +36,18 @@ const TodoItem: React.FC<TodoItemProps> = ({
     setEditDeadlineMode(false);
   };
 
+  const isDeadlineExpired = new Date(todo.deadline) < new Date();
+  const remainingTime =
+    new Date(todo.deadline).getTime() - new Date().getTime();
+  const isDeadlineNear =
+    remainingTime > 0 && remainingTime < 24 * 60 * 60 * 1000; // 1日未満
+
+  const handleDeleteClick = () => {
+    handleDeleteTodo(index);
+  };
+
   return (
-    <li>
+    <li className={isDeadlineExpired ? 'overdue' : ''}>
       <input
         type="checkbox"
         checked={todo.isCompleted}
@@ -47,6 +57,8 @@ const TodoItem: React.FC<TodoItemProps> = ({
         style={{
           textDecoration: todo.isCompleted ? 'line-through' : 'none',
           marginRight: '8px',
+          color: isDeadlineExpired ? 'red' : isDeadlineNear ? 'blue' : 'black',
+          fontWeight: isDeadlineNear ? 'bold' : 'normal',
         }}
       >
         {todo.text}
@@ -71,9 +83,9 @@ const TodoItem: React.FC<TodoItemProps> = ({
             <button onClick={handleSetDeadlineClick}>Set Deadline</button>
           )}
         </>
-      )}
-
-      <button onClick={() => handleDeleteTodo(index)}>Clear!</button>
+     ) }
+      <button onClick={handleDeleteClick}>Clear!</button>
+      {isDeadlineExpired && <span>期日が過ぎています！</span>}
     </li>
   );
 };
@@ -89,10 +101,17 @@ function App() {
   const [deadlineInput, setDeadlineInput] = useState('');
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [taskCount, setTaskCount] = useState(0);
+  const [overdueCount, setOverdueCount] = useState(0);
+  const [duplicateCount, setDuplicateCount] = useState(1);
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
     setTaskCount(todos.length);
+
+    const overdueTasks = todos.filter(
+      (todo) => new Date(todo.deadline) < new Date() && !todo.isCompleted
+    );
+    setOverdueCount(overdueTasks.length);
   }, [todos]);
 
   useEffect(() => {
@@ -110,8 +129,11 @@ function App() {
   };
 
   const handleAddTodo = () => {
+    const newTodo = { text: inputValue, isCompleted: false, deadline: deadlineInput };
+    const duplicatedTodos = Array(duplicateCount).fill(newTodo);
+
     setTodos([
-      { text: inputValue, isCompleted: false, deadline: deadlineInput },
+      ...duplicatedTodos,
       ...todos,
     ]);
     setInputValue('');
@@ -119,14 +141,14 @@ function App() {
   };
 
   const handleDeleteTodo = (index: number) => {
-    setTodos((preTodos) =>
-      preTodos.filter((_, todoIndex) => todoIndex !== index)
+    setTodos((prevTodos) =>
+      prevTodos.filter((_, todoIndex) => todoIndex !== index)
     );
   };
 
   const handleToggleTodo = (index: number) => {
-    setTodos((preTodos) =>
-      preTodos.map((todo, todoIndex) =>
+    setTodos((prevTodos) =>
+      prevTodos.map((todo, todoIndex) =>
         todoIndex === index
           ? { ...todo, isCompleted: !todo.isCompleted }
           : todo
@@ -135,18 +157,32 @@ function App() {
   };
 
   const handleSetDeadline = (index: number, deadline: string) => {
-    setTodos((preTodos) =>
-      preTodos.map((todo, todoIndex) =>
+    setTodos((prevTodos) =>
+      prevTodos.map((todo, todoIndex) =>
         todoIndex === index ? { ...todo, deadline } : todo
       )
     );
   };
+
+  useEffect(() => {
+    const now = new Date();
+    const updatedTodos = todos.filter(
+      (todo) => !todo.deadline || new Date(todo.deadline) > now
+    );
+    setTodos(updatedTodos);
+  }, [currentDateTime]);
+
+  const sortedTodos = [...todos].sort(
+    (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+  );
+
   return (
     <>
       <h1>Todo List</h1>
       <div>
         <p>Now: {currentDateTime.toLocaleString()}</p>
         <p>Total Tasks: {taskCount}</p>
+        <p>Overdue Tasks: {overdueCount}</p>
         {taskCount === 0 && <p>やることないよ！</p>}
         {taskCount >= 10 && <p>早く処理してください！</p>}
       </div>
@@ -156,21 +192,28 @@ function App() {
         value={deadlineInput}
         onChange={(e) => setDeadlineInput(e.target.value)}
       />
+      <input
+        type="number"
+        placeholder="Duplicate Count"
+        value={duplicateCount}
+        onChange={(e) => setDuplicateCount(Number(e.target.value))}
+      />
       <button onClick={handleAddTodo}>Add Task</button>
       <ul>
-        {todos.map((todo, index) => (
+        {sortedTodos.map((todo, index) => (
           <TodoItem
             key={index}
             todo={todo}
             index={index}
             handleDeleteTodo={handleDeleteTodo}
             handleToggleTodo={handleToggleTodo}
-            handleSetDeadline={handleSetDeadline}
-          />
-        ))}
-      </ul>
-    </>
-  );
-}
-
-export default App;
+            handleSetDeadline={
+              handleSetDeadline}
+              />
+            ))}
+          </ul>
+        </>
+      );
+    }
+    
+    export default App;

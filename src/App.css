@@ -35,9 +35,13 @@
 
 .card {
   padding: 2em;
-  background-color:royalblue;
+  background-color:lightblue;
 }
 
 .read-the-docs {
   color: #888;
+}
+.fadeOut {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out; /* Adjust the duration to match the setTimeout duration in the component */
 }
