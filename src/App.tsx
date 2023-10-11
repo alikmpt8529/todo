@@ -37,9 +37,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const isDeadlineExpired = new Date(todo.deadline) < new Date();
-  const remainingTime = new Date(todo.deadline).getTime() - new Date().getTime();
-  const isDeadlineNear =
-    remainingTime > 0 && remainingTime < 24 * 60 * 60 * 1000; // 1日未満
+  const isDeadlineNear = !isDeadlineExpired; // 期日が過ぎた場合は"過ぎています"メッセージを表示しない
 
   const handleDeleteClick = () => {
     handleDeleteTodo(index);
@@ -84,7 +82,9 @@ const TodoItem: React.FC<TodoItemProps> = ({
         </>
       )}
       <button onClick={handleDeleteClick}>Clear!</button>
-      {isDeadlineExpired && !todo.isCompleted && <span>期日が過ぎています！</span>}
+      {isDeadlineExpired && !todo.isCompleted && (
+        <span>期日が過ぎています！</span>
+      )}
     </li>
   );
 };
@@ -131,10 +131,7 @@ function App() {
     const newTodo = { text: inputValue, isCompleted: false, deadline: deadlineInput };
     const duplicatedTodos = Array(duplicateCount).fill(newTodo);
 
-    setTodos([
-      ...duplicatedTodos,
-      ...todos,
-    ]);
+    setTodos((prevTodos) => [...duplicatedTodos, ...prevTodos]);
     setInputValue('');
     setDeadlineInput('');
   };
@@ -163,15 +160,6 @@ function App() {
     );
   };
 
-  useEffect(() => {
-    const now = new Date();
-    // 期日が過ぎていないかつタスクが未完了のものは残す
-    const updatedTodos = todos.filter(
-      (todo) => !todo.deadline || (new Date(todo.deadline) > now && !todo.isCompleted)
-    );
-    setTodos(updatedTodos);
-  }, [currentDateTime]);
-
   const sortedTodos = [...todos].sort(
     (a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
   );
@@ -197,24 +185,22 @@ function App() {
         placeholder="Duplicate Count"
         value={duplicateCount}
         onChange={(e) => setDuplicateCount(Number(e.target.value))}
-        />
-        <button onClick={handleAddTodo}>Add Task</button>
-        
-        <ul>
-          {sortedTodos.map((todo, index) => (
-            <TodoItem
-              key={index}
-              todo={todo}
-              index={index}
-              handleDeleteTodo={handleDeleteTodo}
-              handleToggleTodo={handleToggleTodo}
-              handleSetDeadline={handleSetDeadline}
+      />
+      <button onClick={handleAddTodo}>Add Task</button>
+      <ul>
+        {sortedTodos.map((todo, index) => (
+          <TodoItem
+            key={index}
+            todo={todo}
+            index={index}
+            handleDeleteTodo={handleDeleteTodo}
+            handleToggleTodo={handleToggleTodo}
+            handleSetDeadline={handleSetDeadline}
             />
-          ))}
-        </ul>
-      </>
-    );
-  }
-  
-  export default App;
-  
+            ))}
+            </ul>
+            </>
+            );
+            }
+            
+            export default App;
