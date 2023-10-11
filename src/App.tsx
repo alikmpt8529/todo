@@ -189,7 +189,6 @@ function App() {
         <p>Overdue Tasks: {overdueCount}</p>
         <p>Today's Tasks: {todayTaskCount}</p>
         {taskCount === 0 && <p>やることないよ！</p>}
-        {taskCount >= 10 && <p>早く処理してください！</p>}
       </div>
       <input type="text" value={inputValue} onChange={handleInputChange} />
       <input
