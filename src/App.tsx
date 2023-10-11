@@ -83,9 +83,9 @@ const TodoItem: React.FC<TodoItemProps> = ({
             <button onClick={handleSetDeadlineClick}>Set Deadline</button>
           )}
         </>
-     ) }
+      )}
       <button onClick={handleDeleteClick}>Clear!</button>
-      {isDeadlineExpired && <span>期日が過ぎています！</span>}
+      {isDeadlineExpired && !todo.isCompleted && <span>期日が過ぎています！</span>}
     </li>
   );
 };
@@ -207,9 +207,9 @@ function App() {
             index={index}
             handleDeleteTodo={handleDeleteTodo}
             handleToggleTodo={handleToggleTodo}
-            handleSetDeadline={
-              handleSetDeadline}
-              />
+            handleSetDeadline={handleSetDeadline}
+         
+            />
             ))}
           </ul>
         </>
@@ -217,3 +217,4 @@ function App() {
     }
     
     export default App;
+    
