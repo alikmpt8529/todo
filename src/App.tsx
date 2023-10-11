@@ -59,7 +59,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
             ? 'red'
             : isDeadlineToday
             ? 'blue'
-            : 'black',
+            : 'black', // Change this to 'blue'
           fontWeight: isDeadlineToday ? 'bold' : 'normal',
         }}
       >
@@ -101,7 +101,9 @@ const TodoItem: React.FC<TodoItemProps> = ({
         <span className="warning-msg">警告！</span>
       )}
       {isDeadlineToday && !isDeadlineExpired && (
-        <span className="urgent-msg">急げ！</span>
+        <span className="urgent-msg" style={{ color: 'blue' }}>
+          急げ！
+        </span>
       )}
     </div>
   );
