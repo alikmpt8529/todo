@@ -37,8 +37,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const isDeadlineExpired = new Date(todo.deadline) < new Date();
-  const remainingTime =
-    new Date(todo.deadline).getTime() - new Date().getTime();
+  const remainingTime = new Date(todo.deadline).getTime() - new Date().getTime();
   const isDeadlineNear =
     remainingTime > 0 && remainingTime < 24 * 60 * 60 * 1000; // 1日未満
 
@@ -166,8 +165,9 @@ function App() {
 
   useEffect(() => {
     const now = new Date();
+    // 期日が過ぎていないかつタスクが未完了のものは残す
     const updatedTodos = todos.filter(
-      (todo) => !todo.deadline || new Date(todo.deadline) > now
+      (todo) => !todo.deadline || (new Date(todo.deadline) > now && !todo.isCompleted)
     );
     setTodos(updatedTodos);
   }, [currentDateTime]);
@@ -197,24 +197,24 @@ function App() {
         placeholder="Duplicate Count"
         value={duplicateCount}
         onChange={(e) => setDuplicateCount(Number(e.target.value))}
-      />
-      <button onClick={handleAddTodo}>Add Task</button>
-      <ul>
-        {sortedTodos.map((todo, index) => (
-          <TodoItem
-            key={index}
-            todo={todo}
-            index={index}
-            handleDeleteTodo={handleDeleteTodo}
-            handleToggleTodo={handleToggleTodo}
-            handleSetDeadline={handleSetDeadline}
-         
+        />
+        <button onClick={handleAddTodo}>Add Task</button>
+        
+        <ul>
+          {sortedTodos.map((todo, index) => (
+            <TodoItem
+              key={index}
+              todo={todo}
+              index={index}
+              handleDeleteTodo={handleDeleteTodo}
+              handleToggleTodo={handleToggleTodo}
+              handleSetDeadline={handleSetDeadline}
             />
-            ))}
-          </ul>
-        </>
-      );
-    }
-    
-    export default App;
-    
+          ))}
+        </ul>
+      </>
+    );
+  }
+  
+  export default App;
+  
