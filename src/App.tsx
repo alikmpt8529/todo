@@ -37,7 +37,6 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
 
   const isDeadlineExpired = new Date(todo.deadline) < new Date();
-  const isDeadlineNear = !isDeadlineExpired;
   const isDeadlineToday =
     new Date(todo.deadline).toDateString() === new Date().toDateString();
 
