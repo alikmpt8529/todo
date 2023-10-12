@@ -123,8 +123,10 @@ function App() {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [taskCount, setTaskCount] = useState(0);
   const [overdueCount, setOverdueCount] = useState(0);
-  const [duplicateCount, setDuplicateCount] = useState<number>(1);
+  const [overduePercentage, setOverduePercentage] = useState<number>(0);
   const [todayTaskCount, setTodayTaskCount] = useState(0);
+  const [todayTaskPercentage, setTodayTaskPercentage] = useState<number>(0);
+  const [duplicateCount, setDuplicateCount] = useState<number>(1);
 
   useEffect(() => {
     localStorage.setItem('todos', JSON.stringify(todos));
@@ -135,6 +137,7 @@ function App() {
         new Date(todo.deadline) < new Date() && !todo.isCompleted
     );
     setOverdueCount(overdueTasks.length);
+    setOverduePercentage((overdueTasks.length / taskCount) * 100);
 
     const todayTasks = todos.filter(
       (todo) =>
@@ -142,7 +145,8 @@ function App() {
         new Date().toDateString()
     );
     setTodayTaskCount(todayTasks.length);
-  }, [todos]);
+    setTodayTaskPercentage((todayTasks.length / taskCount) * 100);
+  }, [todos, taskCount]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -208,10 +212,11 @@ function App() {
       <div>
         <p>Now: {currentDateTime.toLocaleString()}</p>
         <p>Total Tasks: {taskCount}</p>
-        <p>Overdue Tasks: {overdueCount}</p>
-        <p>Today's Tasks: {todayTaskCount}</p>
-        {taskCount === 0 && <p>やることないよ！</p>}
+        <p>Overdue Tasks: {overdueCount} ({overduePercentage.toFixed(2)}%)</p>
+        <p>Today's Tasks: {todayTaskCount} ({todayTaskPercentage.toFixed(2)}%)</p>
+        {taskCount === 0 && <p>No tasks to do!</p>}
       </div>
+      
       <input
         type="text"
         value={inputValue}
@@ -246,3 +251,4 @@ function App() {
 }
 
 export default App;
+
